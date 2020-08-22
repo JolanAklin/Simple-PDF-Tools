@@ -5,6 +5,7 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Runtime.CompilerServices;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows;
@@ -30,6 +31,8 @@ namespace simplePDFTools
 
         public string pdfPath;
         public static uint pdfWidth;
+        private string path;
+        private static PdfDocument pdfDocument;
 
 
         public PdfViewer()
@@ -42,26 +45,28 @@ namespace simplePDFTools
         public void StartRender()
         {
             pdfWidth = (uint)this.ActualWidth;
-            RenderPdf();
+            //RenderPdf();
+            PrepareForPdfLoad();
         }
 
-        private void RenderPdf()
+        private void PrepareForPdfLoad()
         {
             if (!string.IsNullOrEmpty(this.pdfPath))
             {
                 //making sure it's an absolute path
-                var path = System.IO.Path.GetFullPath(this.pdfPath);
+                path = System.IO.Path.GetFullPath(this.pdfPath);
 
                 StorageFile.GetFileFromPathAsync(path).AsTask()
                   //load pdf document on background thread
                   .ContinueWith(t => PdfDocument.LoadFromFileAsync(t.Result).AsTask()).Unwrap()
                   //display on UI Thread
-                  .ContinueWith(t2 => PdfToImages(this, t2.Result), TaskScheduler.FromCurrentSynchronizationContext());
+                  .ContinueWith(t2 => PrepareImage(this, t2.Result), TaskScheduler.FromCurrentSynchronizationContext());
             }
         }
 
-        private async static Task PdfToImages(PdfViewer pdfViewer, PdfDocument pdfDoc)
+        private async static Task PrepareImage(PdfViewer pdfViewer, PdfDocument pdfDoc)
         {
+            pdfDocument = pdfDoc;
             var items = pdfViewer.PagesContainer.Items;
             items.Clear();
 
@@ -71,16 +76,25 @@ namespace simplePDFTools
             {
                 using (var page = pdfDoc.GetPage(i))
                 {
-                    var bitmap = await PageToBitmapAsync(page);
                     var image = new Image
                     {
-                        Source = bitmap,
                         HorizontalAlignment = HorizontalAlignment.Center,
                         Margin = new Thickness(4, 4, 4, 4),
-                        MaxWidth = pdfWidth
+                        MaxWidth = pdfWidth,
                     };
                     items.Add(image);
                 }
+            }
+            Image renderimage = (Image)pdfViewer.PagesContainer.Items[0];
+            ShowPage(0, renderimage);
+        }
+
+        private async static Task ShowPage(uint index, Image image)
+        {
+            using (var page = pdfDocument.GetPage(index))
+            {
+                BitmapImage bitmap = await PageToBitmapAsync(page);
+                image.Source = bitmap;
             }
         }
 
