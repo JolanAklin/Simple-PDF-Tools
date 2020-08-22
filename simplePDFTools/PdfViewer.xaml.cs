@@ -27,41 +27,37 @@ namespace simplePDFTools
     /// </summary>
     public partial class PdfViewer : UserControl
     {
-        #region Bindable Properties
 
-        public string PdfPath
-        {
-            get { return (string)GetValue(PdfPathProperty); }
-            set { SetValue(PdfPathProperty, value); }
-        }
-
-        // Using a DependencyProperty as the backing store for PdfPath.  This enables animation, styling, binding, etc...
-        public static readonly DependencyProperty PdfPathProperty = DependencyProperty.Register("PdfPath", typeof(string), typeof(PdfViewer), new PropertyMetadata(null, propertyChangedCallback: OnPdfPathChanged));
-
-        private static void OnPdfPathChanged(DependencyObject d, DependencyPropertyChangedEventArgs e)
-        {
-            var pdfDrawer = (PdfViewer)d;
-
-            if (!string.IsNullOrEmpty(pdfDrawer.PdfPath))
-            {
-                //making sure it's an absolute path
-                var path = System.IO.Path.GetFullPath(pdfDrawer.PdfPath);
-
-                StorageFile.GetFileFromPathAsync(path).AsTask()
-                  //load pdf document on background thread
-                  .ContinueWith(t => PdfDocument.LoadFromFileAsync(t.Result).AsTask()).Unwrap()
-                  //display on UI Thread
-                  .ContinueWith(t2 => PdfToImages(pdfDrawer, t2.Result), TaskScheduler.FromCurrentSynchronizationContext());
-            }
-
-        }
-
-        #endregion
+        public string pdfPath;
+        public static uint pdfWidth;
 
 
         public PdfViewer()
         {
             InitializeComponent();
+            pdfPath = @"C:/testpdf.pdf";
+            
+        }
+
+        public void StartRender()
+        {
+            pdfWidth = (uint)this.ActualWidth;
+            RenderPdf();
+        }
+
+        private void RenderPdf()
+        {
+            if (!string.IsNullOrEmpty(this.pdfPath))
+            {
+                //making sure it's an absolute path
+                var path = System.IO.Path.GetFullPath(this.pdfPath);
+
+                StorageFile.GetFileFromPathAsync(path).AsTask()
+                  //load pdf document on background thread
+                  .ContinueWith(t => PdfDocument.LoadFromFileAsync(t.Result).AsTask()).Unwrap()
+                  //display on UI Thread
+                  .ContinueWith(t2 => PdfToImages(this, t2.Result), TaskScheduler.FromCurrentSynchronizationContext());
+            }
         }
 
         private async static Task PdfToImages(PdfViewer pdfViewer, PdfDocument pdfDoc)
@@ -81,7 +77,7 @@ namespace simplePDFTools
                         Source = bitmap,
                         HorizontalAlignment = HorizontalAlignment.Center,
                         Margin = new Thickness(4, 4, 4, 4),
-                        MaxWidth = 800
+                        MaxWidth = pdfWidth
                     };
                     items.Add(image);
                 }
@@ -95,7 +91,7 @@ namespace simplePDFTools
             using (var stream = new InMemoryRandomAccessStream())
             {
                 PdfPageRenderOptions pdfRenderOption = new PdfPageRenderOptions();
-                pdfRenderOption.DestinationWidth = 800;
+                pdfRenderOption.DestinationWidth = pdfWidth;
                 await page.RenderToStreamAsync(stream,pdfRenderOption);
 
                 image.BeginInit();
