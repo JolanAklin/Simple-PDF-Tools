@@ -24,5 +24,10 @@ namespace simplePDFTools
         {
             InitializeComponent();
         }
+
+        private void ShowPdf_Loaded(object sender, RoutedEventArgs e)
+        {
+            ShowPdf.StartRender();
+        }
     }
 }

@@ -5,8 +5,9 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:simplePDFTools"
         mc:Ignorable="d"
-        Title="MainWindow" Height="450" Width="800">
+        Title="MainWindow" Height="734.805" Width="1105.713">
     <Grid>
-        
+        <local:PdfViewer x:Name="ShowPdf" Loaded="ShowPdf_Loaded"/>
+
     </Grid>
 </Window>
