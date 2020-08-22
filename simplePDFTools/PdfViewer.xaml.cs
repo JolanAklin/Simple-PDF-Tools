@@ -1,4 +1,4 @@
-﻿//code by Lander-Verhack
+﻿//modified code from Lander-Verhack
 //https://blogs.u2u.be/lander/post/2018/01/23/Creating-a-PDF-Viewer-in-WPF-using-Windows-10-APIs
 
 using System;
@@ -80,7 +80,7 @@ namespace simplePDFTools
                     {
                         Source = bitmap,
                         HorizontalAlignment = HorizontalAlignment.Center,
-                        Margin = new Thickness(0, 4, 0, 4),
+                        Margin = new Thickness(4, 4, 4, 4),
                         MaxWidth = 800
                     };
                     items.Add(image);
@@ -94,7 +94,9 @@ namespace simplePDFTools
 
             using (var stream = new InMemoryRandomAccessStream())
             {
-                await page.RenderToStreamAsync(stream);
+                PdfPageRenderOptions pdfRenderOption = new PdfPageRenderOptions();
+                pdfRenderOption.DestinationWidth = 800;
+                await page.RenderToStreamAsync(stream,pdfRenderOption);
 
                 image.BeginInit();
                 image.CacheOption = BitmapCacheOption.OnLoad;

@@ -7,7 +7,7 @@
         mc:Ignorable="d"
         Title="MainWindow" Height="762.805" Width="1097.713">
     <Grid>
-        <local:PdfViewer HorizontalAlignment="Left" Height="712" VerticalAlignment="Top" Width="1070" Margin="10,10,0,0" PdfPath="C:/testpdf.pdf"/>
+        <local:PdfViewer Margin="10,10,0,0" PdfPath="C:/testpdf.pdf"/>
 
     </Grid>
 </Window>
