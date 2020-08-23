@@ -41,7 +41,6 @@ namespace simplePDFTools
         {
             InitializeComponent();
             pdfPath = @"C:/testpdf.pdf";
-            
         }
 
         public void StartRender()
@@ -80,40 +79,41 @@ namespace simplePDFTools
                 imageIndex++;
                 pdfPageImages.Add(pdfimage);
                 items.Add(pdfimage.ResultImage);
-
             }
 
             pdfimage = pdfPageImages[0];
             await pdfimage.GenerateImage();
             currentlyLoadedImages.Add(pdfimage);
-            Console.WriteLine(pdfDocument.GetPage(0).Size.Width + " x " + pdfDocument.GetPage(0).Size.Height);
-            Console.WriteLine(pdfimage.BmpImage.Width + " x " + pdfimage.BmpImage.Height);
+            //Console.WriteLine(pdfDocument.GetPage(0).Size.Width + " x " + pdfDocument.GetPage(0).Size.Height);
+            //Console.WriteLine(pdfimage.BmpImage.Width + " x " + pdfimage.BmpImage.Height);
+            //Console.WriteLine(pdfPageImages.Count + " | " + pdfDocument.PageCount + " | " + items.Count);
         }
 
         private async void ScrollViewer_ScrollChanged(object sender, ScrollChangedEventArgs e)
         {
             uint scrollHeightViewport = (uint)this.ActualHeight;
-            //Console.WriteLine(e.VerticalOffset);
-            uint loadedPagesTotalHeight = 0;
-            foreach (PdfPageImage image in currentlyLoadedImages)
+            uint pagesTotalHeight = 0;
+            int index = 0;
+            foreach (PdfPageImage image in pdfPageImages)
             {
+                index++;
                 Image pdfImage = image.ResultImage;
-                loadedPagesTotalHeight += (uint)(pdfImage.ActualHeight + pdfImage.Margin.Top + pdfImage.Margin.Bottom);
-            }
-            if (e.VerticalOffset + scrollHeightViewport > loadedPagesTotalHeight)
-            {
-                if (pdfDocument != null)
+                pagesTotalHeight += (uint)(pdfImage.ActualHeight + pdfImage.Margin.Top + pdfImage.Margin.Bottom);
+                Console.WriteLine(e.VerticalOffset + " | " + scrollHeightViewport);
+                if (e.VerticalOffset + scrollHeightViewport > pagesTotalHeight)
                 {
-                    if(imageIndex < pdfDocument.PageCount)
+                    if(pdfDocument.PageCount > index)
                     {
-                        //PdfPageImage pdfimage = new PdfPageImage(imageIndex, pdfDocument.GetPage(imageIndex), pdfWidth);
-                        //imageIndex++;
-                        //await pdfimage.GenerateImage();
-                        //var items = this.PagesContainer.Items;
-                        //items.Add(pdfimage.ResultImage);
-                        //currentlyLoadedImages.Add(pdfimage);
+                        PdfPageImage pdfimage = pdfPageImages[index];
+                        Console.WriteLine(index);
+                        if (!pdfimage.AsImage)
+                        {
+                            Console.WriteLine("there");
+                            await pdfimage.GenerateImage();
+                            currentlyLoadedImages.Add(pdfimage);
+                            break;
+                        }
                     }
-
                 }
             }
         }
