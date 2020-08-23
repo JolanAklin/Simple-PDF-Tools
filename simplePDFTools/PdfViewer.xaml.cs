@@ -30,6 +30,9 @@ namespace simplePDFTools
 
         public string pdfPath;
         public static uint pdfWidth;
+        private List<PdfPageImage> currentlyLoadedImages = new List<PdfPageImage>();
+        private PdfDocument pdfDocument;
+        private uint imageIndex = 0;
 
 
         public PdfViewer()
@@ -60,53 +63,49 @@ namespace simplePDFTools
             }
         }
 
-        private async static Task PdfToImages(PdfViewer pdfViewer, PdfDocument pdfDoc)
+        private async Task PdfToImages(PdfViewer pdfViewer, PdfDocument pdfDoc)
         {
             var items = pdfViewer.PagesContainer.Items;
             items.Clear();
+            pdfDocument = pdfDoc;
 
             if (pdfDoc == null) return;
 
-            for (uint i = 0; i < pdfDoc.PageCount; i++)
-            {
-
-                PdfPageImage pdfimage = new PdfPageImage(i, pdfDoc.GetPage(i), pdfWidth);
-                await pdfimage.GenerateImage();
-                items.Add(pdfimage.ResultImage);
-
-                //using (var page = pdfDoc.GetPage(i))
-                //{
-                //    var bitmap = await PageToBitmapAsync(page);
-                //    var image = new Image
-                //    {
-                //        Source = bitmap,
-                //        HorizontalAlignment = HorizontalAlignment.Center,
-                //        Margin = new Thickness(4, 4, 4, 4),
-                //        MaxWidth = pdfWidth
-                //    };
-                //    items.Add(image);
-                //}
-            }
+            PdfPageImage pdfimage = new PdfPageImage(imageIndex, pdfDocument.GetPage(imageIndex), pdfWidth);
+            imageIndex++;
+            await pdfimage.GenerateImage();
+            items.Add(pdfimage.ResultImage);
+            currentlyLoadedImages.Add(pdfimage);
+            Console.WriteLine(pdfDocument.GetPage(0).Size.Width + " x " + pdfDocument.GetPage(0).Size.Height);
+            Console.WriteLine(pdfimage.BmpImage.Width + " x " + pdfimage.BmpImage.Height);
         }
 
-        private static async Task<BitmapImage> PageToBitmapAsync(PdfPage page)
+        private async void ScrollViewer_ScrollChanged(object sender, ScrollChangedEventArgs e)
         {
-            BitmapImage image = new BitmapImage();
-
-            using (var stream = new InMemoryRandomAccessStream())
+            uint scrollHeightViewport = (uint)this.ActualHeight;
+            Console.WriteLine(e.VerticalOffset);
+            uint pagesTotalHeight = 0;
+            foreach (PdfPageImage image in currentlyLoadedImages)
             {
-                PdfPageRenderOptions pdfRenderOption = new PdfPageRenderOptions();
-                pdfRenderOption.DestinationWidth = pdfWidth;
-                await page.RenderToStreamAsync(stream,pdfRenderOption);
-
-                image.BeginInit();
-                image.CacheOption = BitmapCacheOption.OnLoad;
-                image.StreamSource = stream.AsStream();
-                image.EndInit();
+                Image pdfImage = image.ResultImage;
+                pagesTotalHeight += (uint)(pdfImage.ActualHeight + pdfImage.Margin.Top + pdfImage.Margin.Bottom);
             }
+            if (e.VerticalOffset + scrollHeightViewport > pagesTotalHeight)
+            {
+                if (pdfDocument != null)
+                {
+                    if(imageIndex < pdfDocument.PageCount)
+                    {
+                        PdfPageImage pdfimage = new PdfPageImage(imageIndex, pdfDocument.GetPage(imageIndex), pdfWidth);
+                        imageIndex++;
+                        await pdfimage.GenerateImage();
+                        var items = this.PagesContainer.Items;
+                        items.Add(pdfimage.ResultImage);
+                        currentlyLoadedImages.Add(pdfimage);
+                    }
 
-            return image;
+                }
+            }
         }
-
     }
 }

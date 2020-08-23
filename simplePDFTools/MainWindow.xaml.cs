@@ -12,6 +12,7 @@ using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
 using System.Windows.Shapes;
+using Windows.UI.Xaml.Media;
 
 namespace simplePDFTools
 {
@@ -20,6 +21,9 @@ namespace simplePDFTools
     /// </summary>
     public partial class MainWindow : Window
     {
+
+        private bool loaded = false;
+
         public MainWindow()
         {
             InitializeComponent();
@@ -27,7 +31,11 @@ namespace simplePDFTools
 
         private void ShowPdf_Loaded(object sender, RoutedEventArgs e)
         {
-            ShowPdf.StartRender();
+            if(!loaded)
+            {
+                ShowPdf.StartRender();
+                loaded = true;
+            }
         }
     }
 }

@@ -7,7 +7,7 @@
              mc:Ignorable="d" 
              d:DesignHeight="300" d:DesignWidth="300">
     <ScrollViewer PanningMode="Both"
-                Background="DarkGray">
+                Background="DarkGray" ScrollChanged="ScrollViewer_ScrollChanged">
         <ItemsControl x:Name="PagesContainer"/>
     </ScrollViewer>
 </UserControl>
