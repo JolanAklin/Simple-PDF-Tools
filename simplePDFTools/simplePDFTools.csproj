@@ -80,6 +80,7 @@
     </Page>
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="PdfPageImage.cs" />
     <Compile Include="PdfViewer.xaml.cs">
       <DependentUpon>PdfViewer.xaml</DependentUpon>
     </Compile>

@@ -69,18 +69,23 @@ namespace simplePDFTools
 
             for (uint i = 0; i < pdfDoc.PageCount; i++)
             {
-                using (var page = pdfDoc.GetPage(i))
-                {
-                    var bitmap = await PageToBitmapAsync(page);
-                    var image = new Image
-                    {
-                        Source = bitmap,
-                        HorizontalAlignment = HorizontalAlignment.Center,
-                        Margin = new Thickness(4, 4, 4, 4),
-                        MaxWidth = pdfWidth
-                    };
-                    items.Add(image);
-                }
+
+                PdfPageImage pdfimage = new PdfPageImage(i, pdfDoc.GetPage(i), pdfWidth);
+                await pdfimage.GenerateImage();
+                items.Add(pdfimage.ResultImage);
+
+                //using (var page = pdfDoc.GetPage(i))
+                //{
+                //    var bitmap = await PageToBitmapAsync(page);
+                //    var image = new Image
+                //    {
+                //        Source = bitmap,
+                //        HorizontalAlignment = HorizontalAlignment.Center,
+                //        Margin = new Thickness(4, 4, 4, 4),
+                //        MaxWidth = pdfWidth
+                //    };
+                //    items.Add(image);
+                //}
             }
         }
 

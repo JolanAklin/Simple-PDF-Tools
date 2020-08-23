@@ -10,6 +10,7 @@ using System.Windows.Media.Imaging;
 using System.Windows.Controls;
 using System.Windows;
 using System.IO;
+using System.Runtime.InteropServices.WindowsRuntime;
 
 namespace simplePDFTools
 {
@@ -37,7 +38,7 @@ namespace simplePDFTools
             this.PdfWidth = pdfWidth;
         }
 
-        public async void GenerateImage()
+        public async Task GenerateImage()
         {
             bmpImage = await PageToBitmapAsync(pdfPage);
             var image = new Image
