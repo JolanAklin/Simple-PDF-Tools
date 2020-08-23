@@ -38,17 +38,25 @@ namespace simplePDFTools
             this.PdfWidth = pdfWidth;
         }
 
-        public async Task GenerateImage()
+        public void PreGenerateImage()
         {
-            bmpImage = await PageToBitmapAsync(pdfPage);
+            double imgHeight = PdfPage.Size.Height * (PdfWidth / PdfPage.Size.Width);
+            Console.WriteLine(imgHeight);
             var image = new Image
             {
                 Source = bmpImage,
                 HorizontalAlignment = HorizontalAlignment.Center,
                 Margin = new Thickness(4, 4, 4, 4),
-                MaxWidth = pdfWidth
+                MaxWidth = pdfWidth,
+                Height = imgHeight
             };
             resultImage = image;
+        }
+
+        public async Task GenerateImage()
+        {
+            bmpImage = await PageToBitmapAsync(pdfPage);
+            resultImage.Source = bmpImage;
         }
 
         private async Task<BitmapImage> PageToBitmapAsync(PdfPage page)
