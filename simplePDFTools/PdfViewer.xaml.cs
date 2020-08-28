@@ -3,6 +3,7 @@
 
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Text;
@@ -17,6 +18,7 @@ using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
 using System.Windows.Shapes;
 using System.Xml;
+using Windows.ApplicationModel.Chat;
 using Windows.Data.Pdf;
 using Windows.Storage;
 using Windows.Storage.Streams;
@@ -34,7 +36,14 @@ namespace simplePDFTools
         private List<PdfPageImage> currentlyLoadedImages = new List<PdfPageImage>();
         private List<PdfPageImage> pdfPageImages = new List<PdfPageImage>();
         private PdfDocument pdfDocument;
-        private uint imageIndex = 0;
+
+        private MainWindow mainWindow;
+
+        //vars used for displaying the pdfpage
+        //index of the next page to load
+        private uint nextPdfPageIndex = 0;
+        //height of the lastest page, taken at the bottom with the margin
+        private double currentPdfPageTotalHeight = 0;
 
 
         public PdfViewer()
@@ -43,9 +52,10 @@ namespace simplePDFTools
             pdfPath = @"C:/testpdf.pdf";
         }
 
-        public void StartRender()
+        public void StartRender(MainWindow mainWindow)
         {
             pdfWidth = (uint)this.PagesContainer.ActualWidth;
+            this.mainWindow = mainWindow;
             RenderPdf();
         }
 
@@ -68,50 +78,47 @@ namespace simplePDFTools
         {
             var items = pdfViewer.PagesContainer.Items;
             items.Clear();
-            pdfDocument = pdfDoc;
 
             if (pdfDoc == null) return;
             PdfPageImage pdfimage = null;
             for (int i = 0; i < pdfDoc.PageCount; i++)
             {
-                pdfimage = new PdfPageImage(imageIndex, pdfDocument.GetPage(imageIndex), pdfWidth);
+                pdfimage = new PdfPageImage((uint)i, pdfDoc.GetPage((uint)i), pdfWidth);
                 pdfimage.PreGenerateImage();
-                imageIndex++;
                 pdfPageImages.Add(pdfimage);
                 items.Add(pdfimage.ResultImage);
             }
+            pdfDocument = pdfDoc;
 
-            pdfimage = pdfPageImages[0];
-            await pdfimage.GenerateImage();
-            currentlyLoadedImages.Add(pdfimage);
+            //pdfimage = pdfPageImages[0];
+            //await pdfimage.GenerateImage();
+            //currentlyLoadedImages.Add(pdfimage);
+
             //Console.WriteLine(pdfDocument.GetPage(0).Size.Width + " x " + pdfDocument.GetPage(0).Size.Height);
             //Console.WriteLine(pdfimage.BmpImage.Width + " x " + pdfimage.BmpImage.Height);
             //Console.WriteLine(pdfPageImages.Count + " | " + pdfDocument.PageCount + " | " + items.Count);
         }
 
-        private async void ScrollViewer_ScrollChanged(object sender, ScrollChangedEventArgs e)
+        private void ScrollViewer_ScrollChanged(object sender, ScrollChangedEventArgs e)
         {
-            uint scrollHeightViewport = (uint)this.ActualHeight;
-            uint pagesTotalHeight = 0;
-            int index = 0;
-            foreach (PdfPageImage image in pdfPageImages)
+            if(pdfDocument != null)
             {
-                index++;
-                Image pdfImage = image.ResultImage;
-                pagesTotalHeight += (uint)(pdfImage.ActualHeight + pdfImage.Margin.Top + pdfImage.Margin.Bottom);
-                Console.WriteLine(e.VerticalOffset + " | " + scrollHeightViewport);
-                if (e.VerticalOffset + scrollHeightViewport > pagesTotalHeight)
+                if (pdfDocument.PageCount > nextPdfPageIndex)
                 {
-                    if(pdfDocument.PageCount > index)
+                    Image pdfImage = pdfPageImages[(int)nextPdfPageIndex].ResultImage;
+                    if (e.VerticalOffset + this.ActualHeight >= currentPdfPageTotalHeight)
                     {
-                        PdfPageImage pdfimage = pdfPageImages[index];
-                        Console.WriteLine(index);
-                        if (!pdfimage.AsImage)
+                        PdfPageImage pdfimage = pdfPageImages[(int)nextPdfPageIndex];
+                        Console.Write(nextPdfPageIndex);
+                        if(!pdfimage.AsImage)
                         {
                             Console.WriteLine("there");
-                            await pdfimage.GenerateImage();
                             currentlyLoadedImages.Add(pdfimage);
-                            break;
+                            nextPdfPageIndex++;
+                            currentPdfPageTotalHeight += pdfImage.Height + pdfImage.Margin.Top + pdfImage.Margin.Bottom;
+                            mainWindow.txtInfo.Text = nextPdfPageIndex + "|" + pdfDocument.PageCount/* + "\n" + e.VerticalOffset + "|" + currentPdfPageTotalHeight + "\n" +
+                                pdfImage.Height + "|" + pdfImage.Margin.Top + "|" + pdfImage.Margin.Bottom*/;
+                            pdfimage.GenerateImage();
                         }
                     }
                 }

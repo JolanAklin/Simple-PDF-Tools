@@ -33,7 +33,7 @@ namespace simplePDFTools
         {
             if(!loaded)
             {
-                ShowPdf.StartRender();
+                ShowPdf.StartRender(this);
                 loaded = true;
             }
         }

@@ -5,9 +5,14 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:simplePDFTools"
         mc:Ignorable="d"
-        Title="MainWindow" Height="734.805" Width="1105.713" Loaded="ShowPdf_Loaded">
+        Title="MainWindow" Height="734.805" Width="1381.713" Loaded="ShowPdf_Loaded">
     <Grid>
-        <local:PdfViewer x:Name="ShowPdf" Loaded="ShowPdf_Loaded"/>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="123*"/>
+            <RowDefinition Height="229*"/>
+        </Grid.RowDefinitions>
+        <local:PdfViewer x:Name="ShowPdf" Loaded="ShowPdf_Loaded" Margin="150,0,0,0" Grid.RowSpan="2"/>
+        <TextBlock x:Name="txtInfo" HorizontalAlignment="Left" TextWrapping="Wrap" Text="TextBlock" VerticalAlignment="Top" Height="128" Width="150"/>
 
     </Grid>
 </Window>
