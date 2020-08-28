@@ -87,6 +87,7 @@ namespace simplePDFTools
             resultImage.Source = null;
             bmpImage = null;
             asImage = false;
+            GC.Collect();
         }
 
     }
