@@ -90,13 +90,13 @@ namespace simplePDFTools
             }
             pdfDocument = pdfDoc;
 
-            //pdfimage = pdfPageImages[0];
-            //await pdfimage.GenerateImage();
-            //currentlyLoadedImages.Add(pdfimage);
-
-            //Console.WriteLine(pdfDocument.GetPage(0).Size.Width + " x " + pdfDocument.GetPage(0).Size.Height);
-            //Console.WriteLine(pdfimage.BmpImage.Width + " x " + pdfimage.BmpImage.Height);
-            //Console.WriteLine(pdfPageImages.Count + " | " + pdfDocument.PageCount + " | " + items.Count);
+            Image pdfImage = pdfPageImages[0].ResultImage;
+            pdfimage = pdfPageImages[0];
+            currentlyLoadedImages.Add(pdfimage);
+            nextPdfPageIndex++;
+            currentPdfPageTotalHeight += pdfImage.Height + pdfImage.Margin.Top + pdfImage.Margin.Bottom;
+            mainWindow.txtInfo.Text = nextPdfPageIndex + "|" + pdfDocument.PageCount;
+            pdfimage.GenerateImage();
         }
 
         private void ScrollViewer_ScrollChanged(object sender, ScrollChangedEventArgs e)
@@ -111,10 +111,8 @@ namespace simplePDFTools
                         if (e.VerticalOffset + this.ActualHeight >= currentPdfPageTotalHeight)
                         {
                             PdfPageImage pdfimage = pdfPageImages[(int)nextPdfPageIndex];
-                            Console.Write(nextPdfPageIndex);
                             if (!pdfimage.AsImage)
                             {
-                                Console.WriteLine("there");
                                 currentlyLoadedImages.Add(pdfimage);
                                 nextPdfPageIndex++;
                                 currentPdfPageTotalHeight += pdfImage.Height + pdfImage.Margin.Top + pdfImage.Margin.Bottom;
