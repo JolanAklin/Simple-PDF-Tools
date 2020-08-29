@@ -1,6 +1,7 @@
 ﻿//modified code from Lander-Verhack
 //https://blogs.u2u.be/lander/post/2018/01/23/Creating-a-PDF-Viewer-in-WPF-using-Windows-10-APIs
 
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
