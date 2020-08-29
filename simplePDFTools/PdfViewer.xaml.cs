@@ -137,6 +137,8 @@ namespace simplePDFTools
                             }
                         }
                     }
+                }else
+                {
                 }
             }
         }
